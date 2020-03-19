@@ -6,6 +6,7 @@
 package pe.pi.openpipe;
 
 import com.phono.srtplight.Log;
+import java.io.IOException;
 import java.util.function.Consumer;
 import pe.pi.client.small.SliceConnect;
 import pe.pi.sctp4j.sctp.Association;
@@ -52,6 +53,7 @@ public class Session {
                             Log.error("Cant send message on" + stream.getLabel());
                         }
                     }
+
                     @Override
                     public void close(SCTPStream stream) {
                         Log.debug("Got close on " + stream.getLabel());
@@ -59,6 +61,7 @@ public class Session {
                     }
                 });
             }
+
             @Override
             public void onRawStream(SCTPStream stream) {
                 Log.debug("ignoring raw stream open  on " + stream.getLabel());
@@ -67,11 +70,26 @@ public class Session {
         };
     }
 
+    String stripFinger(String fi) {
+        String ret = "nope";
+
+        if (fi != null) {
+            var bits = fi.split(" ");
+            if (bits.length == 2) {
+                if (bits[0].equalsIgnoreCase("sha-256")) {
+                    ret = bits[1].replace(":", "");
+                }
+            }
+        }
+        return ret;
+    }
+
     LCDMessage onOffer(LCDMessage mess) {
         LCDMessage answer = null;
+        Log.debug("dealing with an offer");
 
         if (mess.fingerprint != null) {
-            connect.setFarFingerprint(mess.fingerprint);
+            connect.setFarFingerprint(stripFinger(mess.fingerprint));
             connect.setOfferer(false);
             connect.setDtlsClientRole(false);
             connect.setAssociationListener(assocListener);

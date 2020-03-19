@@ -9,7 +9,6 @@ import com.phono.srtplight.Log;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.CountDownLatch;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -31,7 +30,7 @@ public class Camera {
         WebSocket ws = HttpClient
                 .newHttpClient()
                 .newWebSocketBuilder()
-                .buildAsync(URI.create("wss://pi.pe/websocket/?finger="+id), new WebSocketClient(latch,id))
+                .buildAsync(URI.create("ws://localhost:8887/?id="+id), new WebSocketClient(latch,id))
                 .join();
         latch.await();
     }

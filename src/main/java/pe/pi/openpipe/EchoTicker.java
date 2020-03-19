@@ -6,7 +6,6 @@
 package pe.pi.openpipe;
 
 import com.phono.srtplight.Log;
-import java.net.http.WebSocket;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -16,20 +15,29 @@ import java.util.TimerTask;
  */
 public class EchoTicker {
 
+    Long seen = System.currentTimeMillis();
+
     EchoTicker(WebSocketClient wsc, int i) {
         var tick = new Timer();
         var task = new TimerTask() {
             @Override
             public void run() {
-                Log.debug("echo message");
+                if (seen == null) {
+                    Log.debug("not seen prev echo message");
+                }
+                Log.debug("send new echo message");
                 var echo = new LCDMessage();
                 echo.ltype = "echo";
                 echo.to = wsc.id;
-                echo.session = echo.to + "-" + echo.to + "-" + System.currentTimeMillis();
+                seen = null;
                 wsc.send(echo);
             }
         };
-        tick.schedule(task, i/10, i);
+        tick.schedule(task, i / 10, i);
+    }
+
+    void seen() {
+        seen = System.currentTimeMillis();
     }
 
 }
